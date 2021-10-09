@@ -300,7 +300,11 @@ function processCallbackQuery($callback_query) {
             $fp = fopen($path, 'r+');
             if (flock($fp, LOCK_EX)) {
                 $vote = json_decode(fgets($fp), true);
-                $vote[$user_id] = explode(' ', $data, 2)[1];
+                if ($vote[$user_id] === explode(' ', $data, 2)[1]) {
+                    $vote[$user_id] = '';
+                } else {
+                    $vote[$user_id] = explode(' ', $data, 2)[1];
+                }
                 ftruncate($fp, 0);
                 rewind($fp);
                 fwrite($fp, json_encode($vote));
