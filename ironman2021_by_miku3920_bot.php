@@ -406,22 +406,26 @@ function processChannelPost($channel_post) {
     ]);
 }
 
+function processUpdate($update) {
+    if (isset($update['message'])) {
+        processMessage($update['message']);
+    } elseif (isset($update['inline_query'])) {
+        processInlineQuery($update['inline_query']);
+    } elseif (isset($update['callback_query'])) {
+        processCallbackQuery($update['callback_query']);
+    } elseif (isset($update['chosen_inline_result'])) {
+        processChosenInlineResult($update['chosen_inline_result']);
+    } elseif (isset($update['channel_post'])) {
+        processChannelPost($update['channel_post']);
+    }
+}
+
 if (php_sapi_name() == 'cli') {
     $update_id = 0;
     while (true) {
         $response = apiRequest("getUpdates", array('offset' => $update_id, 'timeout' => 600));
         foreach ($response as $update) {
-            if (isset($update['message'])) {
-                processMessage($update['message']);
-            } elseif (isset($update['inline_query'])) {
-                processInlineQuery($update['inline_query']);
-            } elseif (isset($update['callback_query'])) {
-                processCallbackQuery($update['callback_query']);
-            } elseif (isset($update['chosen_inline_result'])) {
-                processChosenInlineResult($update['chosen_inline_result']);
-            } elseif (isset($update['channel_post'])) {
-                processChannelPost($update['channel_post']);
-            }
+            processUpdate($update);
             print_r($update);
         }
         $latest = count($response) - 1;
@@ -439,6 +443,4 @@ if (!$update) {
     exit;
 }
 
-if (isset($update["message"])) {
-    processMessage($update["message"]);
-}
+processUpdate($update);
