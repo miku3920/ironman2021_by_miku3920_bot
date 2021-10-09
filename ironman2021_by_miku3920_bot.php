@@ -295,15 +295,24 @@ function processCallbackQuery($callback_query) {
     $user_id = $callback_query['from']['id'];
 
     if (strpos($data, "channel_post ") === 0) {
+        $option = explode(' ', $data, 2)[1];
         $path = "./data/$chat_id/$msg_id.json";
         if (file_exists($path)) {
             $fp = fopen($path, 'r+');
             if (flock($fp, LOCK_EX)) {
                 $vote = json_decode(fgets($fp), true);
-                if ($vote[$user_id] === explode(' ', $data, 2)[1]) {
+                if ($vote[$user_id] === $option) {
                     $vote[$user_id] = '';
+                    apiRequestJson('answerCallbackQuery', [
+                        'callback_query_id' => $callback_query['id'],
+                        'text' => '收回 ' . $option
+                    ]);
                 } else {
-                    $vote[$user_id] = explode(' ', $data, 2)[1];
+                    $vote[$user_id] = $option;
+                    apiRequestJson('answerCallbackQuery', [
+                        'callback_query_id' => $callback_query['id'],
+                        'text' => $option
+                    ]);
                 }
                 ftruncate($fp, 0);
                 rewind($fp);
@@ -318,16 +327,20 @@ function processCallbackQuery($callback_query) {
             if (!is_dir('./data/' . $chat_id)) {
                 mkdir('./data/' . $chat_id);
             }
-            $vote = [$user_id => explode(' ', $data, 2)[1]];
+            $vote = [$user_id => $option];
+            apiRequestJson('answerCallbackQuery', [
+                'callback_query_id' => $callback_query['id'],
+                'text' => $option
+            ]);
             file_put_contents($path, json_encode($vote), LOCK_EX);
         }
         $count_like = 0;
         $count_neutral = 0;
         $count_unlike = 0;
         foreach ($vote as $val) {
-            $count_like += $val === 'like';
-            $count_neutral += $val === 'neutral';
-            $count_unlike += $val === 'unlike';
+            $count_like += $val === '👍';
+            $count_neutral += $val === '➖';
+            $count_unlike += $val === '👎';
         }
         $count_like = $count_like === 0 ? '' : ' ' . $count_like;
         $count_neutral = $count_neutral === 0 ? '' : ' ' . $count_neutral;
@@ -339,13 +352,13 @@ function processCallbackQuery($callback_query) {
                 'inline_keyboard' => [[
                     [
                         'text' => '👍' . $count_like,
-                        'callback_data' => 'channel_post like'
+                        'callback_data' => 'channel_post 👍'
                     ], [
                         'text' => '➖' . $count_neutral,
-                        'callback_data' => 'channel_post neutral'
+                        'callback_data' => 'channel_post ➖'
                     ], [
                         'text' => '👎' . $count_unlike,
-                        'callback_data' => 'channel_post unlike'
+                        'callback_data' => 'channel_post 👎'
                     ],
                 ]]
             ]
@@ -393,13 +406,13 @@ function processChannelPost($channel_post) {
             'inline_keyboard' => [[
                 [
                     'text' => '👍',
-                    'callback_data' => 'channel_post like'
+                    'callback_data' => 'channel_post 👍'
                 ], [
                     'text' => '➖',
-                    'callback_data' => 'channel_post neutral'
+                    'callback_data' => 'channel_post ➖'
                 ], [
                     'text' => '👎',
-                    'callback_data' => 'channel_post unlike'
+                    'callback_data' => 'channel_post 👎'
                 ],
             ]]
         ]
