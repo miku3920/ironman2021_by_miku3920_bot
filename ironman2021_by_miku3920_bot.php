@@ -262,24 +262,21 @@ function processInlineQuery($inline_query) {
             if ($text_hide !== '') {
                 $text_fix = str_replace('\*', '*', str_replace($match[0], $match[1], $text));
                 $text_fix_hash = hash('sha3-256', $text_fix);
-                $results = [
-                    [
-                        'type' => 'article',
-                        'id' => 'hide',
-                        'title' => '隱藏部份文字',
-                        'description' => $text_hide,
-                        'input_message_content' => [
-                            'message_text' => $text_hide
-                        ],
-                        'reply_markup' => [
-                            'inline_keyboard' => [[[
-                                'text' => '顯示訊息',
-                                'callback_data' => $text_fix_hash
-                            ]]]
-                        ]
+                array_unshift($results, [
+                    'type' => 'article',
+                    'id' => 'hide',
+                    'title' => '隱藏部份文字',
+                    'description' => $text_hide,
+                    'input_message_content' => [
+                        'message_text' => $text_hide
                     ],
-                    ...$results
-                ];
+                    'reply_markup' => [
+                        'inline_keyboard' => [[[
+                            'text' => '顯示訊息',
+                            'callback_data' => $text_fix_hash
+                        ]]]
+                    ]
+                ]);
             }
         }
 
