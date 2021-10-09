@@ -1,6 +1,13 @@
 <?php
 
-define('WEBHOOK_URL', 'https://my-site.example.com/secret-path-for-webhooks/');
+require_once('config.php');
 
 // if run from console, set or delete webhook
-apiRequest('setWebhook', array('url' => isset($argv[1]) && $argv[1] == 'delete' ? '' : WEBHOOK_URL));
+$handle = curl_init(API_URL . '?method=setWebhook&url=' . WEBHOOK_URL);
+curl_setopt_array($handle, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_CONNECTTIMEOUT => 5,
+    CURLOPT_TIMEOUT => 60
+]);
+echo curl_exec($handle);
+curl_close($handle);
