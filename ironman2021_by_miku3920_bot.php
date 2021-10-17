@@ -228,7 +228,7 @@ function processInlineQuery($inline_query) {
         apiRequestJson('answerInlineQuery', [
             'inline_query_id' => $inline_query['id'],
             'results' => [],
-            // 'cache_time' => 31536000,
+            'cache_time' => 172800,
             'switch_pm_text' => '查看說明',
             'switch_pm_parameter' => 'help_hide'
         ]);
@@ -283,18 +283,19 @@ function processInlineQuery($inline_query) {
         apiRequestJson('answerInlineQuery', [
             'inline_query_id' => $inline_query['id'],
             'results' => $results,
-            // 'cache_time' => 31536000
+            'cache_time' => 172800
         ]);
     }
 }
 
 function processCallbackQuery($callback_query) {
     $data = $callback_query['data'];
-    $msg_id = $callback_query['message']['message_id'];
-    $chat_id = $callback_query['message']['chat']['id'];
     $user_id = $callback_query['from']['id'];
 
     if (strpos($data, "channel_post ") === 0) {
+        $msg_id = $callback_query['message']['message_id'];
+        $chat_id = $callback_query['message']['chat']['id'];
+
         $option = explode(' ', $data, 2)[1];
         $path = "./data/$chat_id/$msg_id.json";
         if (file_exists($path)) {
@@ -368,13 +369,13 @@ function processCallbackQuery($callback_query) {
             'callback_query_id' => $callback_query['id'],
             'text' => file_get_contents('./inline_hash/' . $data . '.txt'),
             'show_alert' => true,
-            // 'cache_time' => 31536000
+            'cache_time' => 172800
         ]);
     } else {
         apiRequestJson('answerCallbackQuery', [
             'callback_query_id' => $callback_query['id'],
             'text' => '找不到資料',
-            // 'cache_time' => 31536000
+            'cache_time' => 172800
         ]);
     }
 }
