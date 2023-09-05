@@ -198,12 +198,12 @@ function processMessage($message) {
                 if (file_exists('./data/' . $chat_id . '/welcome.txt')) {
                     $welcome_text = file_get_contents('./data/' . $chat_id . '/welcome.txt');
                 } else {
-                    $welcome_text = preg_replace('/^ +/m', '', '
+                    $welcome_text = <<<HEREDOC
                         歡迎 [{name}](tg://user?id={user_id}){username} 來到 {chat_title}
 
                         中文化：http\://t\.me\/setlanguage\/plain\-zh\-tw
                         更多群組：https\:\/\/tgtw\.cc
-                    ');
+                        HEREDOC;
                 }
 
                 apiRequestJson("sendMessage", [
